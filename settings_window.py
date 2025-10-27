@@ -1,3 +1,4 @@
+from utils import center_window
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 import json
@@ -12,7 +13,7 @@ class SettingsWindow:
         # Создаём модальное окно
         self.win = tk.Toplevel(parent.root)
         self.win.title("Настройки")
-        self.win.geometry("500x450")
+        center_window(self.win, 500, 450)
         self.win.resizable(False, False)
         self.win.transient(parent.root)
         self.win.grab_set()
@@ -112,9 +113,8 @@ class SettingsWindow:
             self.log_path_entry.delete(0, tk.END)
             self.log_path_entry.insert(0, path)
 
-# Пример использования (для тестирования)
 if __name__ == "__main__":
     root = tk.Tk()
-    root.withdraw()  # скрываем главное окно
+    root.withdraw()  
     win = SettingsWindow(root)
     root.mainloop()

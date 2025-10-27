@@ -1,3 +1,4 @@
+from utils import center_window
 import json
 import tkinter as tk
 from tkinter import ttk, messagebox, Menu
@@ -13,7 +14,7 @@ class MainWindow:
         self.root = root
         self.root.title("Шифровальщик USB-накопителей")
         self.root.geometry("1000x600")
-        self.root.minsize(800, 500)
+        center_window(self.root, 1000, 600)
         self.root.configure(bg="#f0f0f0")
 
         # Верхнее меню
@@ -302,9 +303,9 @@ class MainWindow:
         SettingsWindow(self)
 
     def show_about(self):
-        """Открывает окно помощи"""
-        from help_window import HelpWindow
-        HelpWindow(self)
+        """Открывает окно 'О программе'"""
+        from about_window import AboutWindow
+        AboutWindow(self)
 
     def open_help(self):
         """Открывает окно помощи"""

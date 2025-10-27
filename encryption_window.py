@@ -1,3 +1,4 @@
+from utils import center_window
 import tkinter as tk
 from tkinter import ttk, messagebox
 import threading
@@ -8,11 +9,6 @@ from crypto_engine import encrypt_drive, decrypt_drive
 
 class EncryptionWindow:
     def __init__(self, parent, drive_path, mode="encrypt"):
-        """
-        :param parent: родительское окно (например, MainWindow)
-        :param drive_path: путь к выбранному USB-накопителю
-        :param mode: "encrypt" или "decrypt"
-        """
         self.parent = parent
         self.drive_path = drive_path
         self.mode = mode
@@ -24,7 +20,7 @@ class EncryptionWindow:
         style.theme_use('default')  # гарантирует, что стиль можно переопределить
         style.configure("Green.Horizontal.TProgressbar", foreground='green', background='green')
         self.win.title(f"{'Шифрование' if mode == 'encrypt' else 'Расшифровка'} накопителя")
-        self.win.geometry("500x500")
+        center_window(self.win, 500, 500)
         self.win.resizable(False, False)
         self.win.transient(parent.root)  # делаем модальным
         self.win.grab_set()  # блокируем родительское окно
