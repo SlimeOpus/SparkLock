@@ -54,8 +54,7 @@ class EncryptionWindow:
 
         algorithms = [
             ("AES-256", "Высокая безопасность, стандарт де-факто"),
-            ("ChaCha20", "Быстрый, хорош для мобильных устройств"),
-            ("XChaCha20", "Улучшенная версия ChaCha20 с большим nonce"),
+            ("ChaCha20", "Быстрый, хорош для мобильных устройств")
         ]
 
         for algo, desc in algorithms:
@@ -202,6 +201,7 @@ class EncryptionWindow:
 
     def real_encrypt(self):
         password = self.password_entry.get()
+        algorithm = self.algorithm_var.get()
         drive = self.drive_path
 
         def progress(current, total):

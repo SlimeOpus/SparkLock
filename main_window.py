@@ -18,59 +18,51 @@ class MainWindow:
         self.root.configure(bg="#f0f0f0")
 
         # Верхнее меню
-        top_button_frame = tk.Frame(root, bg="#e0e0e0", height=40)
-        top_button_frame.pack(side="top", fill="x", padx=5, pady=5)
-        top_button_frame.pack_propagate(False)
+        self.top_button_frame = tk.Frame(root, bg="#e0e0e0", height=40)
+        self.top_button_frame.pack(side="top", fill="x", padx=5, pady=5)
+        self.top_button_frame.pack_propagate(False)
 
-        btn_encrypt = ttk.Button(top_button_frame, text="Шифровать", command=self.encrypt_selected, width=12)
+        btn_encrypt = ttk.Button(self.top_button_frame, text="Шифровать", command=self.encrypt_selected, width=12)
         btn_encrypt.pack(side="left", padx=5, pady=5)
-
-        btn_decrypt = ttk.Button(top_button_frame, text="Расшифровать", command=self.decrypt_selected, width=14)
+        btn_decrypt = ttk.Button(self.top_button_frame, text="Расшифровать", command=self.decrypt_selected, width=14)
         btn_decrypt.pack(side="left", padx=5, pady=5)
-
-        btn_settings = ttk.Button(top_button_frame, text="Настройки", command=self.open_settings, width=12)
+        btn_settings = ttk.Button(self.top_button_frame, text="Настройки", command=self.open_settings, width=12)
         btn_settings.pack(side="left", padx=5, pady=5)
-
-        btn_help = ttk.Button(top_button_frame, text="Помощь", command=self.open_help, width=12)
+        btn_help = ttk.Button(self.top_button_frame, text="Помощь", command=self.open_help, width=12)
         btn_help.pack(side="left", padx=5, pady=5)
-
-        btn_about = ttk.Button(top_button_frame, text="О программе", command=self.show_about, width=13)
+        btn_about = ttk.Button(self.top_button_frame, text="О программе", command=self.show_about, width=13)
         btn_about.pack(side="left", padx=5, pady=5)
 
         # --- Левая боковая панель (USB-устройства) ---
-        left_frame = tk.Frame(root, bg="#e0e0e0", width=300)
-        left_frame.pack(side="left", fill="y", padx=5, pady=5)
-        left_frame.pack_propagate(False)
-
-        tk.Label(left_frame, text="Подключённые USB-накопители", font=("Arial", 12, "bold"), bg="#e0e0e0").pack(pady=(10, 5))
+        self.left_frame = tk.Frame(root, bg="#e0e0e0", width=300)
+        self.left_frame.pack(side="left", fill="y", padx=5, pady=5)
+        self.left_frame.pack_propagate(False)
+        tk.Label(self.left_frame, text="Подключённые USB-накопители", font=("Arial", 12, "bold"), bg="#e0e0e0").pack(pady=(10, 5))
 
         # Список устройств
-        self.usb_listbox = tk.Listbox(left_frame, selectmode="single", height=20, bg="white", relief="flat")
+        self.usb_listbox = tk.Listbox(self.left_frame, selectmode="single", height=20, bg="white", relief="flat")
         self.usb_listbox.pack(fill="both", expand=True, padx=5, pady=5)
         self.usb_listbox.bind("<<ListboxSelect>>", self.on_usb_select)
 
         # --- Центральная область (информация) ---
-        center_frame = tk.Frame(root, bg="white", padx=10, pady=10)
-        center_frame.pack(side="left", fill="both", expand=True, padx=5, pady=5)
-
-        tk.Label(center_frame, text="Детальная информация", font=("Arial", 14, "bold"), bg="white").pack(anchor="w", pady=(0, 10))
-
-        self.info_text = tk.Text(center_frame, wrap="word", state="disabled", bg="white", relief="flat", height=20)
+        self.center_frame = tk.Frame(root, bg="white", padx=10, pady=10)
+        self.center_frame.pack(side="left", fill="both", expand=True, padx=5, pady=5)
+        tk.Label(self.center_frame, text="Детальная информация", font=("Arial", 14, "bold"), bg="white").pack(anchor="w", pady=(0, 10))
+        self.info_text = tk.Text(self.center_frame, wrap="word", state="disabled", bg="white", relief="flat", height=20)
         self.info_text.pack(fill="both", expand=True)
 
         # --- Нижняя панель (статус и прогресс) ---
-        bottom_frame = tk.Frame(root, bg="#d0d0d0", height=40)
-        bottom_frame.pack(side="bottom", fill="x", padx=5, pady=5)
-        bottom_frame.pack_propagate(False)
-
-        self.status_label = tk.Label(bottom_frame, text="Готов к работе...", anchor="w", bg="#d0d0d0")
+        self.bottom_frame = tk.Frame(root, bg="#d0d0d0", height=40)
+        self.bottom_frame.pack(side="bottom", fill="x", padx=5, pady=5)
+        self.bottom_frame.pack_propagate(False)
+        self.status_label = tk.Label(self.bottom_frame, text="Готов к работе...", anchor="w", bg="#d0d0d0")
         self.status_label.pack(side="left", padx=10)
-
-        self.progress = ttk.Progressbar(bottom_frame, mode="indeterminate")
+        self.progress = ttk.Progressbar(self.bottom_frame, mode="indeterminate")
         self.progress.pack(side="right", padx=10, fill="x", expand=True)
 
         # Загрузка устройств при запуске
         self.scan_usb_drives()
+        self.apply_theme()
 
     def scan_usb_drives(self):
         """Сканирует и заполняет список USB-устройств"""
@@ -311,6 +303,53 @@ class MainWindow:
         """Открывает окно помощи"""
         from help_window import HelpWindow
         HelpWindow(self)
+
+    def apply_theme(self):
+        """Применяет выбранную тему из настроек"""
+        try:
+            with open("config.json", "r", encoding="utf-8") as f:
+                config = json.load(f)
+            theme = config.get("theme", "light")
+        except:
+            theme = "light"
+
+        if theme == "dark":
+            bg_main = "#2e2e2e"
+            bg_panel = "#3c3c3c"
+            fg_text = "white"
+            listbox_bg = "#4a4a4a"
+            listbox_fg = "white"
+            status_bg = "#252525"
+        else:  # light
+            bg_main = "#f0f0f0"
+            bg_panel = "#e0e0e0"
+            fg_text = "black"
+            listbox_bg = "white"
+            listbox_fg = "black"
+            status_bg = "#d0d0d0"
+
+        # Применяем цвета
+        self.root.configure(bg=bg_main)
+
+        # Все панели
+        for frame in [self.top_button_frame, self.left_frame, self.center_frame, self.bottom_frame]:
+            frame.configure(bg=bg_panel)
+
+        # Метки в панелях
+        for widget in self.root.winfo_children():
+            if isinstance(widget, tk.Label):
+                if widget in [self.status_label]:
+                    widget.configure(bg=status_bg, fg=fg_text)
+                elif widget.master in [self.left_frame, self.top_button_frame, self.bottom_frame]:
+                    widget.configure(bg=bg_panel, fg=fg_text)
+                elif widget.master == self.center_frame:
+                    widget.configure(bg="white", fg="black")
+
+        # Список USB
+        self.usb_listbox.configure(bg=listbox_bg, fg=listbox_fg)
+
+        # Текстовое поле
+        self.info_text.configure(bg="white" if theme == "light" else "#333333", fg=fg_text, insertbackground=fg_text)
 
 # Добавим импорт для disk_usage
 try:

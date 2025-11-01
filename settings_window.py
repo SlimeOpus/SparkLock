@@ -13,7 +13,7 @@ class SettingsWindow:
         # Создаём модальное окно
         self.win = tk.Toplevel(parent.root)
         self.win.title("Настройки")
-        center_window(self.win, 500, 450)
+        center_window(self.win, 500, 500)
         self.win.resizable(False, False)
         self.win.transient(parent.root)
         self.win.grab_set()
@@ -21,16 +21,25 @@ class SettingsWindow:
         # --- Заголовок ---
         tk.Label(self.win, text="Настройки программы", font=("Arial", 16, "bold")).pack(pady=(10, 5))
 
+        # --- Тема интерфейса ---
+        tk.Label(self.win, text="Тема интерфейса:", font=("Arial", 12)).pack(anchor="w", padx=20, pady=(10, 5))
+        self.theme_var = tk.StringVar(value=self.settings.get("theme", "light"))
+        self.theme_var.trace_add("write", lambda *args: self.auto_save())
+        theme_frame = tk.Frame(self.win)
+        theme_frame.pack(anchor="w", padx=30, pady=5)
+        ttk.Radiobutton(theme_frame, text="Светлая", variable=self.theme_var, value="light").pack(anchor="w", pady=2)
+        ttk.Radiobutton(theme_frame, text="Тёмная", variable=self.theme_var, value="dark").pack(anchor="w", pady=2)
+
         # --- Алгоритм по умолчанию ---
         tk.Label(self.win, text="Алгоритм шифрования по умолчанию:", font=("Arial", 12)).pack(anchor="w", padx=20, pady=(10, 5))
         self.default_algo_var = tk.StringVar(value=self.settings.get("default_algorithm", "AES-256"))
+        self.default_algo_var.trace_add("write", lambda *args: self.auto_save())
         algorithm_frame = tk.Frame(self.win)
         algorithm_frame.pack(anchor="w", padx=30, pady=5)
 
         algorithms = [
             ("AES-256", "Высокая безопасность, стандарт де-факто"),
-            ("ChaCha20", "Быстрый, хорош для мобильных устройств"),
-            ("XChaCha20", "Улучшенная версия ChaCha20 с большим nonce"),
+            ("ChaCha20", "Быстрый, хорош для мобильных устройств")
         ]
 
         for algo, desc in algorithms:
@@ -42,8 +51,11 @@ class SettingsWindow:
 
         # Галочки
         self.notify_sound_var = tk.BooleanVar(value=self.settings.get("notify_sound", True))
+        self.notify_sound_var.trace_add("write", lambda *args: self.auto_save())
         self.notify_popup_var = tk.BooleanVar(value=self.settings.get("notify_popup", True))
+        self.notify_popup_var.trace_add("write", lambda *args: self.auto_save())
         self.notify_log_var = tk.BooleanVar(value=self.settings.get("notify_log", False))
+        self.notify_log_var.trace_add("write", lambda *args: self.auto_save())
 
         tk.Checkbutton(self.win, text="Воспроизводить звук", variable=self.notify_sound_var).pack(anchor="w", padx=30, pady=2)
         tk.Checkbutton(self.win, text="Показывать всплывающее окно", variable=self.notify_popup_var).pack(anchor="w", padx=30, pady=2)
@@ -60,13 +72,6 @@ class SettingsWindow:
 
         tk.Button(log_frame, text="Обзор", command=self.browse_log_path).grid(row=0, column=2, padx=5)
 
-        # --- Кнопки ---
-        button_frame = tk.Frame(self.win)
-        button_frame.pack(pady=20)
-
-        ttk.Button(button_frame, text="Сохранить", command=self.save_settings).pack(side="left", padx=10)
-        ttk.Button(button_frame, text="Отмена", command=self.win.destroy).pack(side="right", padx=10)
-
     def load_settings(self):
         """Загружает настройки из файла config.json"""
         if os.path.exists(self.config_file):
@@ -77,6 +82,7 @@ class SettingsWindow:
                     pass
         # Возвращаем настройки по умолчанию
         return {
+            "theme": "light",
             "default_algorithm": "AES-256",
             "notify_sound": True,
             "notify_popup": True,
@@ -84,23 +90,24 @@ class SettingsWindow:
             "log_path": "./encryption_log.txt"
         }
 
-    def save_settings(self):
-        """Сохраняет настройки в файл config.json"""
+    def auto_save(self):
+        """Автоматически сохраняет настройки и применяет их"""
         settings = {
+            "theme": self.theme_var.get(),
             "default_algorithm": self.default_algo_var.get(),
             "notify_sound": self.notify_sound_var.get(),
             "notify_popup": self.notify_popup_var.get(),
             "notify_log": self.notify_log_var.get(),
             "log_path": self.log_path_entry.get().strip()
         }
-
         try:
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(settings, f, indent=4, ensure_ascii=False)
-            messagebox.showinfo("Готово", "Настройки сохранены успешно!")
-            self.win.destroy()
+            # Применяем тему мгновенно
+            if hasattr(self.parent, 'apply_theme'):
+                self.parent.apply_theme()
         except Exception as e:
-            messagebox.showerror("Ошибка", f"Не удалось сохранить настройки:\n{e}")
+            print(f"Не удалось сохранить настройки: {e}")
 
     def browse_log_path(self):
         """Выбор пути к лог-файлу"""
@@ -112,6 +119,7 @@ class SettingsWindow:
         if path:
             self.log_path_entry.delete(0, tk.END)
             self.log_path_entry.insert(0, path)
+            self.auto_save()
 
 if __name__ == "__main__":
     root = tk.Tk()
