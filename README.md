@@ -1,4 +1,5 @@
 <p align="center">
-![Alt text](icon.ico)
+  <img src="icon.ico" width="350">
+</p>
 
 # SparkLock
